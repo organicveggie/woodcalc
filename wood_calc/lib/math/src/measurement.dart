@@ -1,13 +1,15 @@
 import 'fraction.dart';
 
 class Measurement implements Comparable<Measurement> {
+  static const Measurement zero = Measurement(0, null);
+
   final int feet;
   final int inches;
   final Fraction? fraction;
 
   final int totalInches;
 
-  Measurement(this.totalInches, this.fraction)
+  const Measurement(this.totalInches, this.fraction)
       : feet = totalInches ~/ 12,
         inches = totalInches % 12;
 
