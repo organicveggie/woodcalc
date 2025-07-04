@@ -9,6 +9,7 @@
             "cwd": "wood_calc",
             "request": "launch",
             "type": "dart",
+            "program": "lib/main.dart",
             "args": ["--web-port", "8080", "--web-hostname", "0.0.0.0"]
         }
         // {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wood_calc/math/src/measurement.dart';
 import 'package:wood_calc/models/models.dart';
 
 class CalculatorDisplay extends StatelessWidget {
@@ -11,22 +12,22 @@ class CalculatorDisplay extends StatelessWidget {
       decoration: const BoxDecoration(color: Colors.grey),
       margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
       height: 220,
-      child: Expanded(
-          child: Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
             padding: EdgeInsets.fromLTRB(5, 5, 10, 5),
-            child: Consumer2<SettingsModel, EntrySequenceModel>(
-                builder: (BuildContext context, SettingsModel settings, EntrySequenceModel entrySeq, Widget? child) {
-              return Text(
-                entryText(settings, entrySeq),
-                style: Theme.of(context).textTheme.headlineLarge,
-              );
-            }),
+            child: _CalculatorDisplayText(),
+            // child: Consumer3<SettingsModel, EntrySequenceModel, MeasurementInputModel>(builder: (BuildContext context,
+            //     SettingsModel settings, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
+            //   return Text(
+            //     entryText(settings, entrySeq),
+            //     style: Theme.of(context).textTheme.headlineLarge,
+            //   );
+            // }),
           ),
         ],
-      )),
+      ),
     );
   }
 
@@ -37,4 +38,75 @@ class CalculatorDisplay extends StatelessWidget {
       _ => "${entrySeq.measurement.totalInches}$fraction\"",
     };
   }
+}
+
+class _CalculatorDisplayText extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
+      builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? chiild) {
+        if (entrySeq.isEmpty) {
+          if (inputModel.isEmpty) {
+            // No previous entries and no input in progress
+            return Text(
+              "0",
+              style: Theme.of(context).textTheme.headlineLarge,
+            );
+          }
+
+          // No previous entries, but input in progress
+          var total = 0;
+          for (var number in inputModel.digits) {
+            total = total * 10 + number;
+          }
+          return _MeasurementText(Measurement(total, inputModel.fraction));
+        }
+
+        // At least one previous entry
+        final lastEntry = entrySeq.lastEntry;
+        if (entrySeq.length == 1) {
+          if (lastEntry is OperatorEntryModel) {
+            return Text(
+              lastEntry.toString(),
+              style: Theme.of(context).textTheme.headlineLarge,
+            );
+          }
+
+          final number = lastEntry as NumberEntryModel;
+          return _MeasurementText(number.measurement);
+        }
+
+        return Column(
+          children: [
+            Row(),
+            Row(),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MeasurementText extends StatelessWidget {
+  const _MeasurementText(this.measurement);
+
+  final Measurement measurement;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingsModel>(builder: (BuildContext context, SettingsModel settings, Widget? chiild) {
+      return Text(
+        _measurementAsText(settings, measurement),
+        style: Theme.of(context).textTheme.headlineLarge,
+      );
+    });
+  }
+}
+
+String _measurementAsText(SettingsModel settings, Measurement measurement) {
+  final fraction = (measurement.fraction == null) ? "" : " ${measurement.fraction!.asString()}";
+  return switch (settings.displayMode) {
+    DisplayMode.feetAndInches => "${measurement.feet}' ${measurement.inches}$fraction\"",
+    _ => "${measurement.totalInches}$fraction\"",
+  };
 }

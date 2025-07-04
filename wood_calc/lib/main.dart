@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:wood_calc/calculator_display.dart';
 import 'package:wood_calc/models/models.dart';
@@ -8,6 +9,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => EntrySequenceModel()),
+        ChangeNotifierProvider(create: (context) => MeasurementInputModel()),
         ChangeNotifierProvider(create: (context) => SettingsModel()),
       ],
       child: const MyApp(),
@@ -24,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wood Calc',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       home: const MainAppPanel(title: 'Wood Calc'),
@@ -68,9 +70,275 @@ class _MainAppPanelState extends State<MainAppPanel> {
             Row(children: <Widget>[
               Expanded(child: CalculatorDisplay()),
             ]),
+            ButtonGrid(),
           ],
         ),
       ),
     );
+  }
+}
+
+class ButtonGrid extends StatelessWidget {
+  const ButtonGrid({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Table(
+      columnWidths: const <int, TableColumnWidth>{
+        0: FractionColumnWidth(0.25),
+        1: FractionColumnWidth(0.25),
+        2: FractionColumnWidth(0.25),
+        3: FractionColumnWidth(0.25),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        TableRow(
+          children: [
+            ClearOperatorButton(text: "C"),
+            Container(),
+            Container(),
+            Container(
+              constraints: BoxConstraints(minHeight: 100),
+            ),
+          ],
+        ),
+        TableRow(
+          children: [
+            NumberButton(number: 7),
+            NumberButton(number: 8),
+            NumberButton(number: 9),
+            Container(
+              constraints: BoxConstraints(minHeight: 100),
+            ),
+          ],
+        ),
+        TableRow(
+          children: [
+            NumberButton(number: 4),
+            NumberButton(number: 5),
+            NumberButton(number: 6),
+            PlusButton(),
+          ],
+        ),
+        TableRow(
+          children: [
+            NumberButton(number: 3),
+            NumberButton(number: 2),
+            NumberButton(number: 1),
+            OperatorButton(icon: const Icon(Symbols.remove)),
+          ],
+        ),
+        TableRow(
+          children: [
+            FeetInchesButton(),
+            NumberButton(number: 0),
+            OperatorButton(icon: const Icon(Symbols.backspace)),
+            OperatorButton(icon: const Icon(Symbols.equal)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class NumberButton extends StatelessWidget {
+  const NumberButton({super.key, required this.number});
+
+  final int number;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Consumer<MeasurementInputModel>(
+        builder: (BuildContext context, MeasurementInputModel inputModel, Widget? child) {
+      return Container(
+        constraints: BoxConstraints(minHeight: 100),
+        padding: EdgeInsets.all(10),
+        child: Center(
+          child: TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+            ),
+            onPressed: () {
+              inputModel.addDigit(number);
+            },
+            child: Text(
+              "$number",
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+abstract class BaseOperationButton extends StatelessWidget {
+  const BaseOperationButton({super.key});
+
+  Widget makeButton({required BuildContext context, required Icon icon, required void Function() onPressed}) {
+    return Container(
+      constraints: BoxConstraints(
+        minHeight: 100,
+      ),
+      padding: EdgeInsets.all(10),
+      child: Center(
+        child: Ink(
+          decoration: const ShapeDecoration(color: Colors.lightBlue, shape: CircleBorder()),
+          child: IconButton(
+            onPressed: onPressed,
+            icon: icon,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OperatorButton extends BaseOperationButton {
+  const OperatorButton({super.key, required this.icon});
+
+  final Icon icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
+        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
+      return makeButton(context: context, icon: icon, onPressed: () => {});
+    });
+  }
+}
+
+class PlusButton extends BaseOperationButton {
+  const PlusButton({super.key}) : icon = const Icon(Symbols.add);
+
+  final Icon icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
+        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
+      return makeButton(
+          context: context,
+          icon: icon,
+          onPressed: () {
+            print("inputModel.isEmpty: {inputModel.isEmpty}, entrySeq.isEmpty: {entrySeq.isEmpty\n");
+            if (inputModel.isEmpty) {
+              if (entrySeq.isEmpty) {
+                return;
+              }
+
+              final lastEntry = entrySeq.lastEntry;
+              if (lastEntry is OperatorEntryModel) {
+                if (lastEntry.operator == Operator.add) {
+                  return;
+                }
+                return entrySeq.replaceLastOperator(OperatorEntryModel(Operator.add));
+              }
+
+              return entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
+            }
+
+            final newMeasurement = inputModel.toMeasurement();
+            entrySeq.addNumberEntry(NumberEntryModel(newMeasurement), newMeasurement);
+            entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
+            inputModel.clear();
+          });
+    });
+  }
+}
+
+class BackspaceButton extends BaseOperationButton {
+  const BackspaceButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
+        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
+      return makeButton(
+          context: context,
+          icon: Icon(Symbols.backspace),
+          onPressed: () {
+            if (!inputModel.isEmpty) {
+              return inputModel.removeLastDigit();
+            }
+            if (entrySeq.isEmpty) {
+              return;
+            }
+
+            final lastEntry = entrySeq.removeLastEntry();
+            if (lastEntry is NumberEntryModel) {
+              return inputModel.fromMeasurement(lastEntry.measurement);
+            }
+          });
+    });
+  }
+}
+
+abstract class _TextOperatorButton extends StatelessWidget {
+  const _TextOperatorButton({super.key, required this.text});
+
+  final String text;
+
+  Widget makeButton(BuildContext context, void Function() onPressed) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 100),
+      padding: EdgeInsets.all(10),
+      child: Center(
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
+          ),
+          onPressed: () => onPressed(),
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ClearOperatorButton extends _TextOperatorButton {
+  const ClearOperatorButton({super.key, required super.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
+        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
+      return makeButton(context, () {
+        entrySeq.clear();
+        inputModel.clear();
+      });
+    });
+  }
+}
+
+class FeetInchesButton extends BaseOperationButton {
+  const FeetInchesButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingsModel>(builder: (BuildContext context, SettingsModel settings, Widget? child) {
+      return makeButton(
+        context: context,
+        icon: settings.displayMode == DisplayMode.totalInches ? Icon(Symbols.barefoot) : Icon(Symbols.measuring_tape),
+        onPressed: () {
+          settings.displayMode = switch (settings.displayMode) {
+            DisplayMode.feetAndInches => DisplayMode.totalInches,
+            DisplayMode.totalInches => DisplayMode.feetAndInches,
+          };
+        },
+      );
+    });
   }
 }

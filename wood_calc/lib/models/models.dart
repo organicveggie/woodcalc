@@ -13,6 +13,8 @@ class MeasurementInputModel with ChangeNotifier {
 
   Fraction? get fraction => _fraction;
 
+  bool get isEmpty => _digits.isEmpty && (_fraction == null);
+
   set fraction(Fraction? f) {
     _fraction = f;
     notifyListeners();
@@ -25,6 +27,29 @@ class MeasurementInputModel with ChangeNotifier {
 
   void removeLastDigit() {
     _digits.removeLast();
+    notifyListeners();
+  }
+
+  void fromMeasurement(Measurement m) {
+    final inchStr = m.totalInches.toString();
+    for (final c in inchStr.characters) {
+      _digits.add(int.parse(c));
+    }
+    _fraction = m.fraction;
+    notifyListeners();
+  }
+
+  Measurement toMeasurement() {
+    var totalInches = 0;
+    for (var i = 0; i < _digits.length; i++) {
+      totalInches = totalInches + _digits.elementAt(i) * 10 ^ (_digits.length - i - 1);
+    }
+    return Measurement(totalInches, _fraction);
+  }
+
+  void clear() {
+    _digits.clear();
+    _fraction = null;
     notifyListeners();
   }
 }
@@ -54,13 +79,31 @@ class EntrySequenceModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeLastEntry() {
+  void replaceLastOperator(OperatorEntryModel entry) {
+    _sequence.removeLast();
+    addOperatorEntry(entry);
+  }
+
+  void clear() {
+    _sequence.clear();
+    _runningTotal.clear();
+    notifyListeners();
+  }
+
+  bool get isEmpty => _sequence.isEmpty;
+  EntryModel get lastEntry => _sequence.last;
+  int get length => _sequence.length;
+
+  EntryModel? entryAt(int index) => _sequence.elementAtOrNull(index);
+
+  EntryModel removeLastEntry() {
     final entry = _sequence.removeLast();
     if (entry is NumberEntryModel) {
       _runningTotal.removeLast();
     }
 
     notifyListeners();
+    return entry;
   }
 }
 
@@ -70,9 +113,16 @@ class NumberEntryModel extends EntryModel {
 }
 
 enum Operator {
-  add,
-  subtract,
-  equals,
+  add("+"),
+  subtract("-"),
+  equals("=");
+
+  const Operator(this._str);
+
+  final String _str;
+
+  @override
+  String toString() => _str;
 }
 
 class OperatorEntryModel extends EntryModel {
@@ -86,7 +136,7 @@ enum DisplayMode {
 }
 
 class SettingsModel extends ChangeNotifier {
-  DisplayMode _displayMode = DisplayMode.feetAndInches;
+  DisplayMode _displayMode = DisplayMode.totalInches;
 
   DisplayMode get displayMode => _displayMode;
   set displayMode(DisplayMode newMode) {
