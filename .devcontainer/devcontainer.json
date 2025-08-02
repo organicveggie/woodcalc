@@ -1,9 +1,20 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/go
 {
-  "name": "Go",
+  "name": "Flutter arm64",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "ghcr.io/thephaseless/devcontainers/flutter:latest",
+  // "image": "ghcr.io/thephaseless/devcontainers/flutter:latest",
+
+  // Other properties
+  "build": {
+    "context": "..",
+    // "dockerfile": "Dockerfile-flutter",
+    "dockerfile": "Dockerfile-android"
+    // "options": ["--platform=linux/arm64"]
+    // "options": ["--platform=linux/amd64"]
+  },
+
+  // "runArgs": ["--network=host"],
 
   // CirrusLabs builds Flutter SDK from source.
   // "image": "ghcr.io/cirruslabs/flutter:stable",
@@ -12,7 +23,7 @@
   // },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [8080, 9100],
+  // "forwardPorts": [8080, 9100],
 
   // Use 'postCreateCommand' to run commands after the container is created.
   // "postCreateCommand": "go version",
@@ -23,9 +34,9 @@
     "vscode": {
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
-        "baladhruv.flutter-redux-gen",
+        // "baladhruv.flutter-redux-gen",
         "Dart-Code.flutter",
-        "davidanson.vscode-markdownlint",
+        // "davidanson.vscode-markdownlint",
         "esbenp.prettier-vscode",
         "ms-vscode-remote.remote-containers"
       ]

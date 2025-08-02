@@ -1,0 +1,61 @@
+# FROM ubuntu:focal
+# FROM mcr.microsoft.com/devcontainers/base:debian
+FROM ubuntu:24.04
+
+# Set environment variables
+ENV ANDROID_SDK_ROOT=/usr/lib/android-sdk
+ENV ANDROID_PLATFORM_VERSION=36
+ENV ANDROID_BUILD_TOOLS_VERSION=36.0.0
+ENV FLUTTER_SDK_ROOT=/usr/lib/flutter
+
+# Include flutter and android tools in path
+ENV PATH="${PATH}:${FLUTTER_SDK_ROOT}/bin:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools"
+
+# Enable noninteractive installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies and tools
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
+    watchman \
+    openjdk-17-jdk \
+    wget \
+    unzip \
+    zip \
+    curl \
+    git-all \
+    xz-utils \
+    libglu1-mesa \
+    libc6:amd64 libstdc++6:amd64 lib32z1 libbz2-1.0:amd64 && \
+    rm -rf /var/lib/apt/lists/*
+
+# android-sdk \
+# libc6:amd64 libstdc++6:amd64 lib32z1 libbz2-1.0:amd64 && \
+
+# Download and install Android Command Line Tools
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    wget -O commandlinetools.zip "https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip" && \
+    unzip commandlinetools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
+    rm commandlinetools.zip
+
+# Accept Android SDK licenses and install necessary components
+RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses && \
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" && \
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-${ANDROID_PLATFORM_VERSION}" && \
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+
+# Insall Flutter SDK from source
+RUN mkdir -p ${FLUTTER_SDK_ROOT} && \
+    git clone -b stable https://github.com/flutter/flutter ${FLUTTER_SDK_ROOT} && \
+    git config --global --add safe.directory ${FLUTTER_SDK_ROOT} && \
+    cd ${FLUTTER_SDK_ROOT} && \
+    flutter --disable-analytics && \
+    flutter precache --no-ios --no-windows
+
+# Source flutter bash completion
+RUN echo 'source <(flutter bash-completion)' >> ~/.bashrc && \
+    flutter doctor
+
+# Default shell to bash
+SHELL ["/bin/bash", "-c"]

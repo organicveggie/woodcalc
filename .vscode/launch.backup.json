@@ -5,13 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Wood Calc Web",
+            "name": "Flutter",
             "cwd": "wood_calc",
-            "request": "launch",
             "type": "dart",
+            "request": "launch",
             "program": "lib/main.dart",
-            "args": ["--web-port", "8080", "--web-hostname", "0.0.0.0"]
+            "args": 
         }
+        // {
+        //     "name": "Wood Calc Web",
+        //     "cwd": "wood_calc",
+        //     "request": "launch",
+        //     "type": "dart",
+        //     "program": "lib/main.dart",
+        //     "args": ["--web-port", "8080", "--web-hostname", "0.0.0.0"]
+        // }
         // {
         //     "name": "wood_calc (profile mode)",
         //     "cwd": "wood_calc",
