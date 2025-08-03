@@ -62,28 +62,56 @@ class _CalculatorDisplayText extends StatelessWidget {
           return _MeasurementText(Measurement(total, inputModel.fraction));
         }
 
-        // At least one previous entry
-        final lastEntry = entrySeq.lastEntry;
+        // Exactly one entry in the sequence
         if (entrySeq.length == 1) {
-          if (lastEntry is OperatorEntryModel) {
+          if (entrySeq.lastEntry is OperatorEntryModel) {
             return Text(
-              lastEntry.toString(),
+              entrySeq.lastEntry.toString(),
               style: Theme.of(context).textTheme.headlineLarge,
             );
           }
 
-          final number = lastEntry as NumberEntryModel;
+          final number = entrySeq.lastEntry as NumberEntryModel;
           return _MeasurementText(number.measurement);
         }
 
+        // Multiple entries in the entry sequence.
+        // No input text.
+        if (inputModel.isEmpty) {
+          return Column(children: [
+            Row(children: [
+              _entryText(context, entrySeq.entryAt(entrySeq.length - 2)!),
+            ]),
+            Row(
+              children: [
+                _entryText(context, entrySeq.lastEntry),
+              ],
+            ),
+          ]);
+        }
+
+        // Previous entry sequences AND input text in progress.
+        var total = 0;
+        for (var number in inputModel.digits) {
+          total = total * 10 + number;
+        }
         return Column(
           children: [
-            Row(),
-            Row(),
+            Row(children: [_entryText(context, entrySeq.entryAt(entrySeq.length - 2)!)]),
+            Row(children: [_entryText(context, entrySeq.lastEntry)]),
+            Row(children: [_MeasurementText(Measurement(total, inputModel.fraction))]),
           ],
         );
       },
     );
+  }
+
+  Widget _entryText(final BuildContext context, final EntryModel entry) {
+    if (entry is NumberEntryModel) {
+      return _MeasurementText(entry.measurement);
+    }
+
+    return Text(entry.toString(), style: Theme.of(context).textTheme.headlineLarge);
   }
 }
 

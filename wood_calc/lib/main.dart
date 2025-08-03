@@ -226,7 +226,6 @@ class PlusButton extends BaseOperationButton {
           context: context,
           icon: icon,
           onPressed: () {
-            print("inputModel.isEmpty: {inputModel.isEmpty}, entrySeq.isEmpty: {entrySeq.isEmpty\n");
             if (inputModel.isEmpty) {
               if (entrySeq.isEmpty) {
                 return;
