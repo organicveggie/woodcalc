@@ -133,7 +133,7 @@ class ButtonGrid extends StatelessWidget {
             FeetInchesButton(),
             NumberButton(number: 0),
             OperatorButton(icon: const Icon(Symbols.backspace)),
-            OperatorButton(icon: const Icon(Symbols.equal)),
+            EqualButton(),
           ],
         ),
       ],
@@ -247,6 +247,55 @@ class PlusButton extends BaseOperationButton {
             entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
             inputModel.clear();
           });
+    });
+  }
+}
+
+class EqualButton extends BaseOperationButton {
+  const EqualButton({super.key}) : icon = const Icon(Symbols.equal);
+
+  final Icon icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
+        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
+      return makeButton(
+        context: context,
+        icon: icon,
+        onPressed: () {
+          if (inputModel.isEmpty) {
+            if (entrySeq.length < 3) {
+              return;
+            }
+
+            // TODO: Blah
+          }
+
+          if (entrySeq.lastEntry is! OperatorEntryModel) {
+            return;
+          }
+          final secondLast = entrySeq.secondLast();
+          if (secondLast == null || secondLast is! NumberEntryModel) {
+            return;
+          }
+
+          final first = secondLast.measurement;
+          final second = inputModel.toMeasurement();
+          final op = entrySeq.lastEntry as OperatorEntryModel;
+          final result = switch (op.operator) {
+            Operator.add => first.add(second),
+            Operator.subtract => first.sub(second),
+            _ => second,
+          };
+
+          final newMeasurement = inputModel.toMeasurement();
+          entrySeq.addNumberEntry(NumberEntryModel(newMeasurement), newMeasurement);
+          entrySeq.addOperatorEntry(OperatorEntryModel(Operator.equals));
+          entrySeq.addNumberEntry(NumberEntryModel(result), result);
+          inputModel.clear();
+        },
+      );
     });
   }
 }

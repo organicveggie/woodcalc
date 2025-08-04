@@ -101,6 +101,8 @@ class EntrySequenceModel with ChangeNotifier {
 
   EntryModel? entryAt(int index) => _sequence.elementAtOrNull(index);
 
+  EntryModel? secondLast() => (length < 2) ? null : entryAt(length - 2);
+
   EntryModel removeLastEntry() {
     final entry = _sequence.removeLast();
     if (entry is NumberEntryModel) {
