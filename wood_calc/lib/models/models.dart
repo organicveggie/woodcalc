@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../math/math.dart';
@@ -42,7 +43,11 @@ class MeasurementInputModel with ChangeNotifier {
   Measurement toMeasurement() {
     var totalInches = 0;
     for (var i = 0; i < _digits.length; i++) {
-      totalInches = totalInches + _digits.elementAt(i) * 10 ^ (_digits.length - i - 1);
+      final d = _digits.elementAt(i);
+      final powerNum = (_digits.length - i - 1);
+      final tenPow = pow(10, powerNum) as int;
+      final digitValue = d * tenPow;
+      totalInches = totalInches + digitValue;
     }
     return Measurement(totalInches, _fraction);
   }
@@ -96,6 +101,8 @@ class EntrySequenceModel with ChangeNotifier {
 
   EntryModel? entryAt(int index) => _sequence.elementAtOrNull(index);
 
+  EntryModel? secondLast() => (length < 2) ? null : entryAt(length - 2);
+
   EntryModel removeLastEntry() {
     final entry = _sequence.removeLast();
     if (entry is NumberEntryModel) {
@@ -128,6 +135,9 @@ enum Operator {
 class OperatorEntryModel extends EntryModel {
   final Operator operator;
   OperatorEntryModel(this.operator);
+
+  @override
+  String toString() => operator.toString();
 }
 
 enum DisplayMode {
