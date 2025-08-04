@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:wood_calc/calculator_display.dart';
+import 'package:wood_calc/math/math.dart';
 import 'package:wood_calc/models/models.dart';
 
 void main() {
@@ -117,7 +118,7 @@ class ButtonGrid extends StatelessWidget {
             NumberButton(number: 4),
             NumberButton(number: 5),
             NumberButton(number: 6),
-            PlusButton(),
+            OperatorButton(icon: const Icon(Symbols.remove)),
           ],
         ),
         TableRow(
@@ -125,14 +126,14 @@ class ButtonGrid extends StatelessWidget {
             NumberButton(number: 3),
             NumberButton(number: 2),
             NumberButton(number: 1),
-            OperatorButton(icon: const Icon(Symbols.remove)),
+            PlusButton(),
           ],
         ),
         TableRow(
           children: [
             FeetInchesButton(),
             NumberButton(number: 0),
-            OperatorButton(icon: const Icon(Symbols.backspace)),
+            BackspaceButton(),
             EqualButton(),
           ],
         ),
@@ -243,7 +244,7 @@ class PlusButton extends BaseOperationButton {
             }
 
             final newMeasurement = inputModel.toMeasurement();
-            entrySeq.addNumberEntry(NumberEntryModel(newMeasurement), newMeasurement);
+            entrySeq.addNumberEntry(NumberEntryModel(newMeasurement));
             entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
             inputModel.clear();
           });
@@ -268,35 +269,45 @@ class EqualButton extends BaseOperationButton {
             if (entrySeq.length < 3) {
               return;
             }
+            if (entrySeq.lastEntry is! NumberEntryModel) {
+              return;
+            }
 
-            // TODO: Blah
+            final first = entrySeq.entryAt(entrySeq.length - 3) as NumberEntryModel;
+            final op = entrySeq.secondLast() as OperatorEntryModel;
+            final second = entrySeq.lastEntry as NumberEntryModel;
+            final result = _applyOp(first.measurement, second.measurement, op.operator);
+            entrySeq.addOperatorEntry(EqualsOperatorEntryModel(result));
+            return;
           }
 
           if (entrySeq.lastEntry is! OperatorEntryModel) {
             return;
           }
-          final secondLast = entrySeq.secondLast();
-          if (secondLast == null || secondLast is! NumberEntryModel) {
+          final firstNumber = entrySeq.secondLast();
+          if (firstNumber == null || firstNumber is! NumberEntryModel) {
             return;
           }
 
-          final first = secondLast.measurement;
-          final second = inputModel.toMeasurement();
           final op = entrySeq.lastEntry as OperatorEntryModel;
-          final result = switch (op.operator) {
-            Operator.add => first.add(second),
-            Operator.subtract => first.sub(second),
-            _ => second,
-          };
+          final inputMeasurement = inputModel.toMeasurement();
 
-          final newMeasurement = inputModel.toMeasurement();
-          entrySeq.addNumberEntry(NumberEntryModel(newMeasurement), newMeasurement);
-          entrySeq.addOperatorEntry(OperatorEntryModel(Operator.equals));
-          entrySeq.addNumberEntry(NumberEntryModel(result), result);
+          final result = _applyOp(firstNumber.measurement, inputMeasurement, op.operator);
+
+          entrySeq.addNumberEntry(NumberEntryModel(inputMeasurement));
+          entrySeq.addOperatorEntry(EqualsOperatorEntryModel(result));
           inputModel.clear();
         },
       );
     });
+  }
+
+  Measurement _applyOp(Measurement first, Measurement second, Operator op) {
+    return switch (op) {
+      Operator.add => first.add(second),
+      Operator.subtract => first.sub(second),
+      _ => second,
+    };
   }
 }
 
@@ -321,6 +332,18 @@ class BackspaceButton extends BaseOperationButton {
             final lastEntry = entrySeq.removeLastEntry();
             if (lastEntry is NumberEntryModel) {
               return inputModel.fromMeasurement(lastEntry.measurement);
+            }
+            if (lastEntry is! OperatorEntryModel) {
+              // this should never happen
+              return;
+            }
+
+            // If we just removed an operator and the entry sequence still includes a number,
+            // move that measurement into the input field so that the next BackSpace removes
+            // the last digit of the measurement.
+            if (!entrySeq.isEmpty && entrySeq.lastEntry is NumberEntryModel) {
+              final nextLastEntry = entrySeq.removeLastEntry() as NumberEntryModel;
+              return inputModel.fromMeasurement(nextLastEntry.measurement);
             }
           });
     });

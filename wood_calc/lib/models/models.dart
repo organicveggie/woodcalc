@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 
 import '../math/math.dart';
@@ -62,20 +63,14 @@ class MeasurementInputModel with ChangeNotifier {
 abstract class EntryModel {}
 
 class EntrySequenceModel with ChangeNotifier {
-  final Queue<EntryModel> _sequence;
-  final Queue<Measurement> _runningTotal;
+  final List<EntryModel> _sequence;
 
-  EntrySequenceModel()
-      : _sequence = ListQueue.of(<EntryModel>[]),
-        _runningTotal = ListQueue.of([Measurement.zero]);
+  EntrySequenceModel() : _sequence = List.of(<EntryModel>[]);
 
-  UnmodifiableListView<EntryModel> get sequence => UnmodifiableListView(_sequence);
+  BuiltList<EntryModel> get sequence => BuiltList<EntryModel>.of(_sequence);
 
-  Measurement get measurement => _runningTotal.last;
-
-  void addNumberEntry(NumberEntryModel entry, Measurement newTotal) {
+  void addNumberEntry(NumberEntryModel entry) {
     _sequence.add(entry);
-    _runningTotal.add(newTotal);
     notifyListeners();
   }
 
@@ -91,7 +86,6 @@ class EntrySequenceModel with ChangeNotifier {
 
   void clear() {
     _sequence.clear();
-    _runningTotal.clear();
     notifyListeners();
   }
 
@@ -105,10 +99,6 @@ class EntrySequenceModel with ChangeNotifier {
 
   EntryModel removeLastEntry() {
     final entry = _sequence.removeLast();
-    if (entry is NumberEntryModel) {
-      _runningTotal.removeLast();
-    }
-
     notifyListeners();
     return entry;
   }
@@ -138,6 +128,11 @@ class OperatorEntryModel extends EntryModel {
 
   @override
   String toString() => operator.toString();
+}
+
+class EqualsOperatorEntryModel extends OperatorEntryModel {
+  final Measurement measurement;
+  EqualsOperatorEntryModel(this.measurement) : super(Operator.equals);
 }
 
 enum DisplayMode {
