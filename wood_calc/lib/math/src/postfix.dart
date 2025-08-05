@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:built_collection/built_collection.dart';
+import 'package:wood_calc/collections/collections.dart';
 
 import 'expression.dart';
 
@@ -25,6 +26,8 @@ class PostfixExpression {
         continue;
       }
       if (opItem == Operator.rightParen) {
+        // Pop operators off the stack until we get to the previous
+        // left parentheses.
         while (stack.isNotEmpty) {
           final stackOp = stack.pop();
           if (stackOp == Operator.leftParen) {
@@ -47,19 +50,4 @@ class PostfixExpression {
 
     return PostfixExpression(BuiltList<ExpressionEntry>.of(output));
   }
-}
-
-class Stack<E> {
-  final List<E> _items = <E>[];
-  Stack();
-
-  void push(E item) => _items.add(item);
-  E pop() => _items.removeLast();
-
-  bool get isEmpty => _items.isEmpty;
-  bool get isNotEmpty => _items.isNotEmpty;
-
-  E get last => _items.last;
-
-  int get length => _items.length;
 }

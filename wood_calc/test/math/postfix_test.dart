@@ -4,59 +4,6 @@ import 'package:parameterized_test/parameterized_test.dart';
 import 'package:wood_calc/math/math.dart';
 
 void main() {
-  group('Stack', () {
-    late Stack<int> stack;
-    setUp(() {
-      stack = Stack();
-    });
-
-    test('empty stack', () {
-      expect(stack.length, equals(0));
-      expect(stack.isEmpty, equals(true));
-      expect(stack.isNotEmpty, equals(false));
-    });
-    group('push/pop', () {
-      test('one item', () {
-        stack.push(42);
-        expect(stack.length, equals(1));
-        expect(stack.isEmpty, equals(false));
-        expect(stack.isNotEmpty, equals(true));
-
-        final got = stack.pop();
-        expect(got, equals(42));
-        expect(stack.isEmpty, equals(true));
-      });
-
-      test('multiple items', () {
-        expect(stack.isEmpty, equals(true));
-        stack.push(42);
-        stack.push(13);
-        stack.push(735);
-        expect(stack.isEmpty, equals(false));
-        expect(stack.length, equals(3));
-
-        expect(stack.pop(), equals(735));
-        expect(stack.pop(), equals(13));
-        expect(stack.pop(), equals(42));
-        expect(stack.isEmpty, equals(true));
-      });
-
-      test('multiple items interleaved', () {
-        expect(stack.isEmpty, equals(true));
-        stack.push(42);
-        stack.push(13);
-        stack.pop();
-        stack.push(735);
-        stack.push(17);
-
-        expect(stack.pop(), equals(17));
-        expect(stack.pop(), equals(735));
-        expect(stack.isEmpty, equals(false));
-        expect(stack.length, equals(1));
-      });
-    });
-  });
-
   group('Create PostfixExpression', () {
     const measure2in = Measurement.fromInches(2);
     const measure3in = Measurement.fromInches(3);
@@ -112,6 +59,75 @@ void main() {
           // Test function accepting the provided parameters
           (Measurement a, Operator op1, Measurement b, Operator op2, Measurement c, BuiltList<ExpressionEntry> want) {
         final pf = PostfixExpression.fromInfix(BuiltList<ExpressionEntry>.of([a, op1, b, op2, c]));
+        expect(pf.items, equals(want));
+      });
+    });
+
+    group('with parentheses', () {
+      parameterizedTest(
+          'returns correct postfix',
+          // List of values to test
+          [
+            [
+              BuiltList.of([
+                Operator.leftParen,
+                measure3in,
+                Operator.add,
+                measure8in,
+                Operator.rightParen,
+                Operator.multiply,
+                measure2in
+              ]),
+              BuiltList.of([
+                measure3in,
+                measure8in,
+                Operator.add,
+                measure2in,
+                Operator.multiply,
+              ])
+            ],
+            [
+              BuiltList.of([
+                measure3in,
+                Operator.multiply,
+                Operator.leftParen,
+                measure8in,
+                Operator.add,
+                measure2in,
+                Operator.rightParen
+              ]),
+              BuiltList.of([measure3in, measure8in, measure2in, Operator.add, Operator.multiply]),
+            ],
+            [
+              BuiltList.of([
+                Operator.leftParen,
+                measure3in,
+                Operator.multiply,
+                Operator.leftParen,
+                measure8in,
+                Operator.add,
+                measure2in,
+                Operator.rightParen,
+                Operator.add,
+                measure2in,
+                Operator.rightParen,
+                Operator.multiply,
+                measure3in
+              ]),
+              BuiltList.of([
+                measure3in,
+                measure8in,
+                measure2in,
+                Operator.add,
+                Operator.multiply,
+                measure2in,
+                Operator.add,
+                measure3in,
+                Operator.multiply
+              ]),
+            ],
+          ], (BuiltList<ExpressionEntry> infix, BuiltList<ExpressionEntry> want) {
+        final pf = PostfixExpression.fromInfix(infix);
         expect(pf.items, equals(want));
       });
     });

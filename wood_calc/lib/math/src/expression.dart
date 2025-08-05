@@ -13,8 +13,8 @@ enum Operator implements OperatorExpression {
   multiply("*", Tier.two),
   divide("/", Tier.two),
   equals("=", Tier.notApplicable),
-  leftParen("(", Tier.four),
-  rightParen(")", Tier.four);
+  leftParen("(", Tier.notApplicable),
+  rightParen(")", Tier.notApplicable);
 
   const Operator(this._str, this._tier);
 
