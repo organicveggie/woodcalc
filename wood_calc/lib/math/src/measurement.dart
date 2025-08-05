@@ -1,6 +1,7 @@
+import 'expression.dart';
 import 'fraction.dart';
 
-class Measurement implements Comparable<Measurement> {
+class Measurement implements Comparable<Measurement>, OperandExpression {
   static const Measurement zero = Measurement(0, null);
 
   final int feet;
@@ -13,7 +14,7 @@ class Measurement implements Comparable<Measurement> {
       : feet = totalInches ~/ 12,
         inches = totalInches % 12;
 
-  Measurement.fromInches(int totalInches) : this(totalInches, null);
+  const Measurement.fromInches(int totalInches) : this(totalInches, null);
 
   Measurement add(Measurement other) => Measurement(totalInches + other.totalInches, fraction?.add(other.fraction));
 
