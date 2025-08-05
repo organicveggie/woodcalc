@@ -5,6 +5,8 @@ import 'package:wood_calc/calculator_display.dart';
 import 'package:wood_calc/math/math.dart';
 import 'package:wood_calc/models/models.dart';
 
+typedef VoidFN = void Function();
+
 void main() {
   runApp(
     MultiProvider(
@@ -108,9 +110,7 @@ class ButtonGrid extends StatelessWidget {
             NumberButton(number: 7),
             NumberButton(number: 8),
             NumberButton(number: 9),
-            Container(
-              constraints: BoxConstraints(minHeight: 100),
-            ),
+            OperatorButton(icon: const Icon(Symbols.close)),
           ],
         ),
         TableRow(
@@ -126,15 +126,15 @@ class ButtonGrid extends StatelessWidget {
             NumberButton(number: 3),
             NumberButton(number: 2),
             NumberButton(number: 1),
-            PlusButton(),
+            PlusOpButton(),
           ],
         ),
         TableRow(
           children: [
             FeetInchesButton(),
             NumberButton(number: 0),
-            BackspaceButton(),
-            EqualButton(),
+            BackspaceOpButton(),
+            EqualOpButton(),
           ],
         ),
       ],
@@ -180,126 +180,135 @@ class NumberButton extends StatelessWidget {
 abstract class BaseOperationButton extends StatelessWidget {
   const BaseOperationButton({super.key});
 
-  Widget makeButton({required BuildContext context, required Icon icon, required void Function() onPressed}) {
+  Widget makeButton({required BuildContext context, required Icon icon, VoidFN? onPressed}) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return Container(
       constraints: BoxConstraints(
         minHeight: 100,
       ),
-      padding: EdgeInsets.all(10),
       child: Center(
-        child: Ink(
-          decoration: const ShapeDecoration(color: Colors.lightBlue, shape: CircleBorder()),
-          child: IconButton(
-            onPressed: onPressed,
-            icon: icon,
-            color: Colors.white,
+        child: IconButton(
+          style: IconButton.styleFrom(
+            padding: EdgeInsets.all(10),
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            shape: CircleBorder(),
           ),
+          onPressed: onPressed,
+          icon: icon,
         ),
       ),
     );
   }
 }
 
-class OperatorButton extends BaseOperationButton {
-  const OperatorButton({super.key, required this.icon});
+abstract class BaseOpButton extends StatelessWidget {
+  const BaseOpButton({super.key, required this.icon});
 
   final Icon icon;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
-        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
-      return makeButton(context: context, icon: icon, onPressed: () => {});
-    });
-  }
-}
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
 
-class PlusButton extends BaseOperationButton {
-  const PlusButton({super.key}) : icon = const Icon(Symbols.add);
-
-  final Icon icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
-        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
-      return makeButton(
-          context: context,
-          icon: icon,
-          onPressed: () {
-            if (inputModel.isEmpty) {
-              if (entrySeq.isEmpty) {
-                return;
-              }
-
-              final lastEntry = entrySeq.lastEntry;
-              if (lastEntry is OperatorEntryModel) {
-                if (lastEntry.operator == Operator.add) {
-                  return;
-                }
-                return entrySeq.replaceLastOperator(OperatorEntryModel(Operator.add));
-              }
-
-              return entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
-            }
-
-            final newMeasurement = inputModel.toMeasurement();
-            entrySeq.addNumberEntry(NumberEntryModel(newMeasurement));
-            entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
-            inputModel.clear();
-          });
-    });
-  }
-}
-
-class EqualButton extends BaseOperationButton {
-  const EqualButton({super.key}) : icon = const Icon(Symbols.equal);
-
-  final Icon icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
-        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
-      return makeButton(
-        context: context,
-        icon: icon,
-        onPressed: () {
-          if (inputModel.isEmpty) {
-            if (entrySeq.length < 3) {
-              return;
-            }
-            if (entrySeq.lastEntry is! NumberEntryModel) {
-              return;
-            }
-
-            final first = entrySeq.entryAt(entrySeq.length - 3) as NumberEntryModel;
-            final op = entrySeq.secondLast() as OperatorEntryModel;
-            final second = entrySeq.lastEntry as NumberEntryModel;
-            final result = _applyOp(first.measurement, second.measurement, op.operator);
-            entrySeq.addOperatorEntry(EqualsOperatorEntryModel(result));
-            return;
-          }
-
-          if (entrySeq.lastEntry is! OperatorEntryModel) {
-            return;
-          }
-          final firstNumber = entrySeq.secondLast();
-          if (firstNumber == null || firstNumber is! NumberEntryModel) {
-            return;
-          }
-
-          final op = entrySeq.lastEntry as OperatorEntryModel;
-          final inputMeasurement = inputModel.toMeasurement();
-
-          final result = _applyOp(firstNumber.measurement, inputMeasurement, op.operator);
-
-          entrySeq.addNumberEntry(NumberEntryModel(inputMeasurement));
-          entrySeq.addOperatorEntry(EqualsOperatorEntryModel(result));
-          inputModel.clear();
-        },
+    return Consumer2<EntrySequenceModel, MeasurementInputModel>(builder: (final BuildContext context,
+        final EntrySequenceModel entrySeq, final MeasurementInputModel inputModel, Widget? child) {
+      return Container(
+        constraints: BoxConstraints(
+          minHeight: 100,
+        ),
+        child: Center(
+          child: IconButton(
+            style: IconButton.styleFrom(
+              padding: EdgeInsets.all(10),
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: CircleBorder(),
+            ),
+            onPressed: isEnabled(entrySeq, inputModel)
+                ? () {
+                    onPressed(entrySeq, inputModel);
+                  }
+                : null,
+            icon: icon,
+          ),
+        ),
       );
     });
+  }
+
+  bool isEnabled(EntrySequenceModel entrySeq, MeasurementInputModel inputModel) => true;
+  void onPressed(final EntrySequenceModel entrySeq, final MeasurementInputModel inputModel);
+}
+
+class PlusOpButton extends BaseOpButton {
+  const PlusOpButton({super.key}) : super(icon: const Icon(Symbols.add));
+
+  @override
+  void onPressed(final EntrySequenceModel entrySeq, final MeasurementInputModel inputModel) {
+    if (inputModel.isEmpty) {
+      if (entrySeq.isEmpty) {
+        return;
+      }
+
+      final lastEntry = entrySeq.lastEntry;
+      if (lastEntry is OperatorEntryModel) {
+        if (lastEntry.operator == Operator.add) {
+          return;
+        }
+        return entrySeq.replaceLastOperator(OperatorEntryModel(Operator.add));
+      }
+
+      return entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
+    }
+
+    final newMeasurement = inputModel.toMeasurement();
+    entrySeq.addNumberEntry(NumberEntryModel(newMeasurement));
+    entrySeq.addOperatorEntry(OperatorEntryModel(Operator.add));
+    inputModel.clear();
+  }
+}
+
+class EqualOpButton extends BaseOpButton {
+  const EqualOpButton({super.key}) : super(icon: const Icon(Symbols.equal));
+
+  @override
+  void onPressed(final EntrySequenceModel entrySeq, final MeasurementInputModel inputModel) {
+    if (inputModel.isEmpty) {
+      if (entrySeq.length < 3) {
+        return;
+      }
+      if (entrySeq.lastEntry is! NumberEntryModel) {
+        return;
+      }
+
+      final first = entrySeq.entryAt(entrySeq.length - 3) as NumberEntryModel;
+      final op = entrySeq.secondLast() as OperatorEntryModel;
+      final second = entrySeq.lastEntry as NumberEntryModel;
+      final result = _applyOp(first.measurement, second.measurement, op.operator);
+      entrySeq.addOperatorEntry(EqualsOperatorEntryModel(result));
+      return;
+    }
+
+    if (entrySeq.lastEntry is! OperatorEntryModel) {
+      return;
+    }
+    final firstNumber = entrySeq.secondLast();
+    if (firstNumber == null || firstNumber is! NumberEntryModel) {
+      return;
+    }
+
+    final op = entrySeq.lastEntry as OperatorEntryModel;
+    final inputMeasurement = inputModel.toMeasurement();
+
+    final result = _applyOp(firstNumber.measurement, inputMeasurement, op.operator);
+
+    entrySeq.addNumberEntry(NumberEntryModel(inputMeasurement));
+    entrySeq.addOperatorEntry(EqualsOperatorEntryModel(result));
+    inputModel.clear();
   }
 
   Measurement _applyOp(Measurement first, Measurement second, Operator op) {
@@ -311,43 +320,45 @@ class EqualButton extends BaseOperationButton {
   }
 }
 
-class BackspaceButton extends BaseOperationButton {
-  const BackspaceButton({super.key});
+class BackspaceOpButton extends BaseOpButton {
+  const BackspaceOpButton({super.key}) : super(icon: const Icon(Symbols.backspace));
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
-        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? child) {
-      return makeButton(
-          context: context,
-          icon: Icon(Symbols.backspace),
-          onPressed: () {
-            if (!inputModel.isEmpty) {
-              return inputModel.removeLastDigit();
-            }
-            if (entrySeq.isEmpty) {
-              return;
-            }
+  void onPressed(final EntrySequenceModel entrySeq, final MeasurementInputModel inputModel) {
+    if (!inputModel.isEmpty) {
+      return inputModel.removeLastDigit();
+    }
+    if (entrySeq.isEmpty) {
+      return;
+    }
 
-            final lastEntry = entrySeq.removeLastEntry();
-            if (lastEntry is NumberEntryModel) {
-              return inputModel.fromMeasurement(lastEntry.measurement);
-            }
-            if (lastEntry is! OperatorEntryModel) {
-              // this should never happen
-              return;
-            }
+    final lastEntry = entrySeq.removeLastEntry();
+    if (lastEntry is NumberEntryModel) {
+      return inputModel.fromMeasurement(lastEntry.measurement);
+    }
+    if (lastEntry is! OperatorEntryModel) {
+      // this should never happen
+      return;
+    }
 
-            // If we just removed an operator and the entry sequence still includes a number,
-            // move that measurement into the input field so that the next BackSpace removes
-            // the last digit of the measurement.
-            if (!entrySeq.isEmpty && entrySeq.lastEntry is NumberEntryModel) {
-              final nextLastEntry = entrySeq.removeLastEntry() as NumberEntryModel;
-              return inputModel.fromMeasurement(nextLastEntry.measurement);
-            }
-          });
-    });
+    // If we just removed an operator and the entry sequence still includes a number,
+    // move that measurement into the input field so that the next BackSpace removes
+    // the last digit of the measurement.
+    if (!entrySeq.isEmpty && entrySeq.lastEntry is NumberEntryModel) {
+      final nextLastEntry = entrySeq.removeLastEntry() as NumberEntryModel;
+      return inputModel.fromMeasurement(nextLastEntry.measurement);
+    }
   }
+}
+
+class OperatorButton extends BaseOpButton {
+  const OperatorButton({super.key, required super.icon});
+
+  @override
+  void onPressed(EntrySequenceModel entrySeq, MeasurementInputModel inputModel) => {};
+
+  @override
+  bool isEnabled(EntrySequenceModel entrySeq, MeasurementInputModel inputModel) => false;
 }
 
 abstract class _TextOperatorButton extends StatelessWidget {
