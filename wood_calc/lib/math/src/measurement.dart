@@ -31,6 +31,10 @@ class Measurement implements Comparable<Measurement>, OperandExpression {
   Measurement sub(Measurement other) => Measurement(totalInches - other.totalInches, fraction?.sub(other.fraction));
 
   Measurement mul(Measurement other) {
+    if (fraction == null && other.fraction != null) {
+      return other.mul(this);
+    }
+
     final newFraction = fraction?.mul(other.totalInches);
     final newFractionMeasure = Measurement.fromFraction(newFraction);
     final newTotal = totalInches * other.totalInches;

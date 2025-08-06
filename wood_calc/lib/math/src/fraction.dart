@@ -4,7 +4,7 @@ class Fraction implements Comparable<Fraction> {
   final int numerator;
   final Denominator denominator;
 
-  Fraction(this.numerator, this.denominator);
+  const Fraction(this.numerator, this.denominator);
 
   Fraction normalize() {
     if (numerator % 2 == 0 && denominator != Denominator.half) {

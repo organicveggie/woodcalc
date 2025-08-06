@@ -4,11 +4,16 @@ import 'package:wood_calc/collections/collections.dart';
 import 'expression.dart';
 import 'measurement.dart';
 
-abstract class ExpressionNode {}
+abstract class ExpressionNode {
+  Measurement evaluate();
+}
 
 class OperandExpressionNode implements ExpressionNode {
   final Measurement operand;
   const OperandExpressionNode(this.operand);
+
+  @override
+  Measurement evaluate() => operand;
 }
 
 class OperatorExpressionNode implements ExpressionNode {
@@ -17,6 +22,19 @@ class OperatorExpressionNode implements ExpressionNode {
   final ExpressionNode right;
 
   const OperatorExpressionNode(this.operator, this.left, this.right);
+
+  @override
+  Measurement evaluate() {
+    final leftMeasure = left.evaluate();
+    final rightMeasure = right.evaluate();
+
+    return switch (operator) {
+      Operator.add => leftMeasure.add(rightMeasure),
+      Operator.subtract => leftMeasure.sub(rightMeasure),
+      Operator.multiply => leftMeasure.mul(rightMeasure),
+      _ => leftMeasure.add(rightMeasure),
+    };
+  }
 }
 
 class ExpressionTree {
@@ -39,4 +57,6 @@ class ExpressionTree {
 
     return ExpressionTree(stack.pop());
   }
+
+  Measurement evaluate() => root.evaluate();
 }

@@ -1,5 +1,6 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:parameterized_test/parameterized_test.dart';
 import 'package:wood_calc/math/math.dart';
 
 void main() {
@@ -93,6 +94,125 @@ void main() {
         expect(rightNode.operator, equals(Operator.add));
         checkOperand(rightNode.left, measure3in);
         checkOperand(rightNode.right, measure8in);
+      });
+    });
+  });
+
+  group('ExpressionNode.evaluate', () {
+    test('Operand returns operand', () {
+      expect(OperandExpressionNode(measure1in).evaluate(), equals(measure1in));
+    });
+
+    group('two operands', () {
+      parameterizedTest(
+          'without fractions produces expected values',
+          // List of values to test
+          [
+            [measure1in, Operator.add, measure2in, measure3in],
+            [measure3in, Operator.subtract, measure2in, measure1in],
+            [measure1in, Operator.multiply, measure2in, measure2in],
+          ],
+          // Test function accepting the provided parameters
+          (Measurement first, Operator op, Measurement second, Measurement want) {
+        final node = OperatorExpressionNode(op, OperandExpressionNode(first), OperandExpressionNode(second));
+        expect(node.evaluate(), equals(want));
+      });
+      parameterizedTest(
+          'with fractions produces execpted values',
+          // List of values to test
+          [
+            [
+              Measurement(2, Fraction(3, Denominator.eighth)),
+              Operator.add,
+              Measurement(2, Fraction(4, Denominator.eighth)),
+              Measurement(4, Fraction(7, Denominator.eighth))
+            ],
+          ],
+          // Test function accepting the provided parameters
+          (Measurement first, Operator op, Measurement second, Measurement want) {
+        final node = OperatorExpressionNode(op, OperandExpressionNode(first), OperandExpressionNode(second));
+        expect(node.evaluate(), equals(want));
+      });
+    });
+
+    group('three operands', () {
+      const oneQuarter = Fraction(1, Denominator.quarter);
+      const oneEighth = Fraction(1, Denominator.eighth);
+
+      parameterizedTest(
+          'without fractions produces expected values',
+          // List of values to test
+          [
+            [
+              // a+b+c
+              BuiltList.of([measure1in, measure2in, Operator.add, measure3in, Operator.add]),
+              Measurement.fromInches(6)
+            ],
+            [
+              // (a+b)*c
+              BuiltList.of([measure1in, measure2in, Operator.add, measure3in, Operator.multiply]),
+              Measurement.fromInches(9)
+            ],
+            [
+              // a*(b+c)
+              BuiltList.of([measure1in, measure2in, measure3in, Operator.add, Operator.multiply]),
+              Measurement.fromInches(5)
+            ],
+            [
+              // a+b*c
+              BuiltList.of([measure1in, measure2in, measure3in, Operator.multiply, Operator.add]),
+              Measurement.fromInches(7)
+            ],
+          ],
+          // Test function accepting the provided parameters
+          (BuiltList<ExpressionEntry> postfix, Measurement want) {
+        final tree = ExpressionTree.fromPostfix(postfix);
+        expect(tree.root.evaluate(), equals(want));
+      });
+
+      parameterizedTest(
+          'with fractions produces expected results',
+          // List of values to test
+          [
+            [
+              // a + b + c
+              BuiltList.of([
+                Measurement(1, oneQuarter),
+                Measurement(1, oneQuarter),
+                Operator.add,
+                Measurement(1, oneQuarter),
+                Operator.add
+              ]),
+              Measurement(3, Fraction(3, Denominator.quarter))
+            ],
+            [
+              // (a + b) * c
+              BuiltList.of([
+                Measurement(1, oneQuarter),
+                Measurement(1, oneQuarter),
+                Operator.add,
+                measure2in,
+                Operator.multiply,
+              ]),
+              Measurement.fromInches(5),
+            ],
+            [
+              // a * (b + c)
+              BuiltList.of([
+                measure2in,
+                Measurement(2, oneEighth),
+                Measurement(1, oneEighth),
+                Operator.add,
+                Operator.multiply,
+              ]),
+              Measurement(6, Fraction(1, Denominator.half)),
+            ],
+          ],
+          // Test function accepting the provided parameters
+          (BuiltList<ExpressionEntry> postfix, Measurement want) {
+        final tree = ExpressionTree.fromPostfix(postfix);
+        final m = tree.root.evaluate();
+        expect(m, equals(want));
       });
     });
   });
