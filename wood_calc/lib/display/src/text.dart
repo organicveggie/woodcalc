@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get_it/get_it.dart';
 import 'package:wood_calc/math/math.dart';
 import 'package:wood_calc/models/models.dart';
+import 'package:wood_calc/stores/main.dart';
 
 class InputEntryText extends StatelessWidget {
   const InputEntryText({super.key, required this.entry});
@@ -37,17 +39,17 @@ class MeasurementText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsModel>(builder: (BuildContext context, SettingsModel settings, Widget? chiild) {
-      return Text(
-        measurementAsText(settings, measurement),
-        style: Theme.of(context).textTheme.headlineLarge,
-      );
-    });
+    final store = GetIt.I<MainStore>();
+    return Observer(
+        builder: (_) => Text(
+              measurementAsText(store.displayMode, measurement),
+              style: Theme.of(context).textTheme.headlineLarge,
+            ));
   }
 
-  String measurementAsText(SettingsModel settings, Measurement measurement) {
+  String measurementAsText(DisplayMode mode, Measurement measurement) {
     final fraction = (measurement.fraction == null) ? "" : " ${measurement.fraction!.asString()}";
-    return switch (settings.displayMode) {
+    return switch (mode) {
       DisplayMode.feetAndInches => "${measurement.feet}' ${measurement.inches}$fraction\"",
       _ => "${measurement.totalInches}$fraction\"",
     };

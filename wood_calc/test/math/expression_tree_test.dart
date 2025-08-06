@@ -218,7 +218,7 @@ void main() {
   });
 }
 
-checkOperand(ExpressionNode got, OperandExpression want) {
+void checkOperand(ExpressionNode got, OperandExpression want) {
   expect(got, isA<OperandExpressionNode>());
 
   final opNode = got as OperandExpressionNode;
