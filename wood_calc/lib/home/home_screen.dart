@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../buttons/layout.dart';
-import '../calculator/display.dart';
+import 'package:wood_calc/display/display.dart';
+import 'package:wood_calc/keyboard/keyboard.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -22,15 +21,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
         child: Column(
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Row(children: <Widget>[
+          children: [
+            Row(children: [
               Expanded(child: CalculatorDisplay()),
             ]),
-            ButtonGrid(),
+            KeyboardGrid(),
           ],
         ),
       ),

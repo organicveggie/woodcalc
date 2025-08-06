@@ -5,8 +5,8 @@ import 'function_buttons.dart';
 import 'number_buttons.dart';
 import 'operator_buttons.dart';
 
-class ButtonGrid extends StatelessWidget {
-  const ButtonGrid({super.key});
+class KeyboardGrid extends StatelessWidget {
+  const KeyboardGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
