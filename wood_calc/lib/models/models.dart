@@ -109,19 +109,6 @@ class NumberEntryModel extends EntryModel {
   NumberEntryModel(this.measurement);
 }
 
-enum Operator {
-  add("+"),
-  subtract("-"),
-  equals("=");
-
-  const Operator(this._str);
-
-  final String _str;
-
-  @override
-  String toString() => _str;
-}
-
 class OperatorEntryModel extends EntryModel {
   final Operator operator;
   OperatorEntryModel(this.operator);
