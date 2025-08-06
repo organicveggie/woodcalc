@@ -39,6 +39,10 @@ class Fraction implements Comparable<Fraction> {
     return add(Fraction(-other.numerator, other.denominator));
   }
 
+  Fraction mul(int multiplier) {
+    return Fraction(numerator * multiplier, denominator);
+  }
+
   String asString() => '$numerator/${denominator.value}';
 
   @override

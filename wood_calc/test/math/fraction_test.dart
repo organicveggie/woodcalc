@@ -117,6 +117,21 @@ void main() {
       });
     });
 
+    group('.mul', () {
+      parameterizedTest(
+          'returns expected value',
+          // List of values to test
+          [
+            [Fraction(1, Denominator.half), 2, Fraction(2, Denominator.half)],
+            [Fraction(1, Denominator.quarter), 3, Fraction(3, Denominator.quarter)],
+            [Fraction(5, Denominator.eighth), 4, Fraction(20, Denominator.eighth)],
+          ],
+          // Test function accepting the provided parameters
+          (Fraction a, int multiplier, Fraction want) {
+        expect(a.mul(multiplier), equals(want));
+      });
+    });
+
     group('.compareTo', () {
       parameterizedTest(
           'returns correct relationship',

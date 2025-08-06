@@ -16,9 +16,26 @@ class Measurement implements Comparable<Measurement>, OperandExpression {
 
   const Measurement.fromInches(int totalInches) : this(totalInches, null);
 
+  factory Measurement.fromFraction(Fraction? f) {
+    if (f == null) {
+      return Measurement.fromInches(0);
+    }
+    final totalInches = f.numerator ~/ f.denominator.value;
+    final newNumerator = f.numerator - totalInches * f.denominator.value;
+    final newFraction = (newNumerator > 0) ? Fraction(newNumerator, f.denominator).normalize() : null;
+    return Measurement(totalInches, newFraction);
+  }
+
   Measurement add(Measurement other) => Measurement(totalInches + other.totalInches, fraction?.add(other.fraction));
 
   Measurement sub(Measurement other) => Measurement(totalInches - other.totalInches, fraction?.sub(other.fraction));
+
+  Measurement mul(Measurement other) {
+    final newFraction = fraction?.mul(other.totalInches);
+    final newFractionMeasure = Measurement.fromFraction(newFraction);
+    final newTotal = totalInches * other.totalInches;
+    return newFractionMeasure.add(Measurement.fromInches(newTotal));
+  }
 
   String inchesToString() {
     if (fraction != null) {
