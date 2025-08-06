@@ -1,3 +1,5 @@
+import 'package:built_collection/built_collection.dart';
+
 class Stack<E> {
   final List<E> _items = <E>[];
   Stack();
@@ -11,4 +13,6 @@ class Stack<E> {
   E get last => _items.last;
 
   int get length => _items.length;
+
+  BuiltList<E> toBuiltList() => BuiltList<E>.of(_items);
 }
