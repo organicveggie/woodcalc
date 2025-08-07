@@ -22,11 +22,7 @@ abstract class BaseIconInputButton extends StatelessWidget {
             foregroundColor: colorScheme.onPrimary,
             shape: CircleBorder(),
           ),
-          onPressed: isEnabled()
-              ? () {
-                  if (onPressed != null) onPressed();
-                }
-              : null,
+          onPressed: (isEnabled() && (onPressed != null)) ? () => onPressed() : null,
           icon: icon,
         ),
       ),
@@ -64,11 +60,7 @@ abstract class TextInputButton extends StatelessWidget {
             backgroundColor: colorScheme.secondary,
             foregroundColor: colorScheme.onSecondary,
           ),
-          onPressed: isEnabled()
-              ? () {
-                  if (onPressed != null) onPressed();
-                }
-              : null,
+          onPressed: (isEnabled() && (onPressed != null)) ? () => onPressed() : null,
           child: Text(
             text,
             style: Theme.of(context).textTheme.headlineLarge,

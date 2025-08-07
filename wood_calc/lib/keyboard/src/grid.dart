@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import 'function_buttons.dart';
 import 'number_buttons.dart';
@@ -34,7 +33,7 @@ class KeyboardGrid extends StatelessWidget {
             NumberButton(number: 7),
             NumberButton(number: 8),
             NumberButton(number: 9),
-            IconOperatorButton(icon: const Icon(Symbols.close)),
+            MultiplyOperatorButton(),
           ],
         ),
         TableRow(
@@ -42,7 +41,7 @@ class KeyboardGrid extends StatelessWidget {
             NumberButton(number: 4),
             NumberButton(number: 5),
             NumberButton(number: 6),
-            IconOperatorButton(icon: const Icon(Symbols.remove)),
+            SubtractOperatorButton(),
           ],
         ),
         TableRow(
@@ -50,7 +49,7 @@ class KeyboardGrid extends StatelessWidget {
             NumberButton(number: 3),
             NumberButton(number: 2),
             NumberButton(number: 1),
-            PlusOperatorButton(),
+            AddOperatorButton(),
           ],
         ),
         TableRow(
