@@ -20,12 +20,10 @@ class KeyboardGrid extends StatelessWidget {
       children: [
         TableRow(
           children: [
-            ClearOperatorButton(text: "C"),
+            ClearOperatorButton(),
             Container(),
             Container(),
-            Container(
-              constraints: BoxConstraints(minHeight: 100),
-            ),
+            DivisionOperatorButton(),
           ],
         ),
         TableRow(

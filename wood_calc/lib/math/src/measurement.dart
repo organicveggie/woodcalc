@@ -45,6 +45,7 @@ class Measurement implements Comparable<Measurement>, OperandExpression {
     return switch (op) {
       Operator.add => add(other),
       Operator.subtract => sub(other),
+      Operator.multiply => mul(other),
       _ => other,
     };
   }

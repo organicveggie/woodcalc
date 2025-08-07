@@ -38,7 +38,7 @@ class BackspaceOperatorButton extends IconInputButton {
 }
 
 class ClearOperatorButton extends TextInputButton {
-  const ClearOperatorButton({super.key, required super.text});
+  const ClearOperatorButton({super.key}) : super(text: "C");
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +48,21 @@ class ClearOperatorButton extends TextInputButton {
               context: context,
               isEnabled: () => store.hasInputData,
               onPressed: () => store.clearAll(),
+            ));
+  }
+}
+
+class DivisionOperatorButton extends TextInputButton {
+  const DivisionOperatorButton({super.key}) : super(text: "÷");
+
+  @override
+  Widget build(BuildContext context) {
+    final store = GetIt.I<MainStore>();
+    return Observer(
+        builder: (_) => makeButton(
+              context: context,
+              isEnabled: () => store.canApplyOperator,
+              onPressed: () {},
             ));
   }
 }
@@ -76,7 +91,7 @@ class MultiplyOperatorButton extends IconInputButton {
     return Observer(
         builder: (_) => makeIconButton(
               context: context,
-              isEnabled: () => store.canApplyOperator,
+              isEnabled: () => store.canMultiply,
               onPressed: () => store.addOperator(Operator.multiply),
             ));
   }

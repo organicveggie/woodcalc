@@ -33,11 +33,7 @@ abstract class _MainStore with Store {
   }
 
   @computed
-  bool get canMultiply {
-    if (_entrySequence.isEmpty && _activeInput.isEmpty) return false;
-    if (_entrySequence.lastNumberEntryModel == null && _activeInput.isEmpty) return false;
-    return true;
-  }
+  bool get canMultiply => canApplyOperator;
 
   @computed
   BuiltList<EntryModel> get entries => _entrySequence.sequence;
