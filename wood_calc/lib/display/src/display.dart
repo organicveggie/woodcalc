@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get_it/get_it.dart';
 import 'package:wood_calc/math/src/measurement.dart';
-import 'package:wood_calc/models/models.dart';
+import 'package:wood_calc/stores/main.dart';
 
 import 'text.dart';
 
@@ -30,26 +31,27 @@ class CalculatorDisplay extends StatelessWidget {
 class _TextDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer2<EntrySequenceModel, MeasurementInputModel>(
-        builder: (BuildContext context, EntrySequenceModel entrySeq, MeasurementInputModel inputModel, Widget? chiild) {
-      // Existing entries in the sequence
-      final entries = List<Widget>.of(entrySeq.sequence.map((e) => InputEntryText(entry: e)));
+    final store = GetIt.I<MainStore>();
+    return Observer(
+      builder: (_) {
+        final entries = List<Widget>.of(store.entries.map((e) => InputEntryText(entry: e)));
 
-      // In progress input
-      if (!inputModel.isEmpty) {
-        var total = 0;
-        for (var number in inputModel.digits) {
-          total = total * 10 + number;
+        // In progress input
+        if (store.hasInputs) {
+          var total = 0;
+          for (var number in store.inputDigits) {
+            total = total * 10 + number;
+          }
+          entries.add(MeasurementText(measurement: Measurement(total, store.inputFraction)));
         }
-        entries.add(MeasurementText(measurement: Measurement(total, inputModel.fraction)));
-      }
 
-      if (entries.isEmpty) {
-        // No previous entries and no input in progress, so display a placeholder.
-        entries.add(Text("0", style: Theme.of(context).textTheme.headlineLarge));
-      }
+        if (entries.isEmpty) {
+          // No previous entries and no input in progress, so display a placeholder.
+          entries.add(Text("0", style: Theme.of(context).textTheme.headlineLarge));
+        }
 
-      return Row(children: entries);
-    });
+        return Row(children: entries);
+      },
+    );
   }
 }
