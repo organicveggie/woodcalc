@@ -12,6 +12,7 @@ class PostfixExpression {
     final output = Queue<ExpressionEntry>();
     final stack = Stack<OperatorExpression>();
 
+    // TODO: Building postfix should handle invalid expressions
     for (final item in expression) {
       if (item is OperandExpression) {
         output.addLast(item);

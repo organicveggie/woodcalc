@@ -42,7 +42,7 @@ class Measurement implements Comparable<Measurement>, OperandExpression {
   }
 
   Measurement div(Measurement other) {
-    // TODO: fix me
+    // TODO: Finish division calculation
     return Measurement.fromInches(totalInches ~/ other.totalInches);
   }
 

@@ -62,7 +62,7 @@ abstract class _MainStore with Store {
   void addOperator(Operator op) {
     if (_activeInput.isEmpty) {
       if (_entrySequence.isEmpty) {
-        // TODO: Display error
+        // TODO: Display error on missing entry sequence
         return;
       }
       if (_entrySequence.lastOperatorEntryModel != null) {
@@ -97,7 +97,7 @@ abstract class _MainStore with Store {
       return;
     }
     if (lastEntry is! OperatorEntryModel) {
-      // TODO: throw exception because this should never happen
+      // TODO: Display error when missing an OperatorEntry
       return;
     }
 
@@ -120,6 +120,8 @@ abstract class _MainStore with Store {
 
   @action
   void calculateEquals() {
+    // TODO: Catch invalid input before calculating equals result
+
     if (_activeInput.isNotEmpty) {
       _entrySequence = _entrySequence.addNumberEntry(NumberEntryModel(_activeInput.toMeasurement()));
       _activeInput = MeasurementInput.empty();
@@ -127,6 +129,7 @@ abstract class _MainStore with Store {
 
     final postfix = PostfixExpression.fromInfix(_entrySequence.toExpressionEntryList());
     final tree = ExpressionTree.fromPostfix(postfix.items);
+    // TODO: Catch errors evaluating expression tree
     _entrySequence = _entrySequence.addOperatorEntry(EqualsOperatorEntryModel(tree.evaluate()));
   }
 

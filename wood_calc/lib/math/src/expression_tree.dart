@@ -25,6 +25,7 @@ class OperatorExpressionNode implements ExpressionNode {
 
   @override
   Measurement evaluate() {
+    // TODO: Evaluate should handle invalid trees
     final leftMeasure = left.evaluate();
     final rightMeasure = right.evaluate();
     return leftMeasure.applyOp(operator, rightMeasure);
@@ -36,6 +37,7 @@ class ExpressionTree {
   const ExpressionTree(this.root);
 
   factory ExpressionTree.fromPostfix(BuiltList<ExpressionEntry> postfix) {
+    // TODO: Building expression tree from postfix should handle invalid
     final stack = Stack<ExpressionNode>();
 
     for (final item in postfix) {
@@ -52,5 +54,8 @@ class ExpressionTree {
     return ExpressionTree(stack.pop());
   }
 
-  Measurement evaluate() => root.evaluate();
+  Measurement evaluate() {
+    // TODO: Evaluate should handle invalid trees
+    return root.evaluate();
+  }
 }
