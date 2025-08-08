@@ -53,7 +53,9 @@ class MeasurementInput {
   }
 }
 
-abstract class EntryModel {}
+abstract class EntryModel {
+  ExpressionEntry toExpressionEntry();
+}
 
 class EntrySequence {
   final BuiltList<EntryModel> _sequence;
@@ -103,11 +105,16 @@ class EntrySequence {
     entries.add(entry);
     return EntrySequence(entries.build());
   }
+
+  BuiltList<ExpressionEntry> toExpressionEntryList() => BuiltList.of(_sequence.map((e) => e.toExpressionEntry()));
 }
 
 class NumberEntryModel extends EntryModel {
   final Measurement measurement;
   NumberEntryModel(this.measurement);
+
+  @override
+  ExpressionEntry toExpressionEntry() => measurement;
 }
 
 class OperatorEntryModel extends EntryModel {
@@ -116,6 +123,9 @@ class OperatorEntryModel extends EntryModel {
 
   @override
   String toString() => operator.toString();
+
+  @override
+  ExpressionEntry toExpressionEntry() => operator;
 }
 
 class EqualsOperatorEntryModel extends OperatorEntryModel {

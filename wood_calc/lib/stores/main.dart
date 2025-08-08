@@ -120,41 +120,14 @@ abstract class _MainStore with Store {
 
   @action
   void calculateEquals() {
-    if (_activeInput.isEmpty) {
-      if (_entrySequence.length < 3) {
-        // TODO: Display error
-        return;
-      }
-      if (_entrySequence.lastEntry is! NumberEntryModel) {
-        // TODO: Display error
-        return;
-      }
-
-      final first = _entrySequence.entryAt(_entrySequence.length - 3) as NumberEntryModel;
-      final op = _entrySequence.secondLast() as OperatorEntryModel;
-      final second = _entrySequence.lastEntry as NumberEntryModel;
-      final result = first.measurement.applyOp(op.operator, second.measurement);
-      _entrySequence = _entrySequence.addOperatorEntry(EqualsOperatorEntryModel(result));
-      return;
+    if (_activeInput.isNotEmpty) {
+      _entrySequence = _entrySequence.addNumberEntry(NumberEntryModel(_activeInput.toMeasurement()));
+      _activeInput = MeasurementInput.empty();
     }
 
-    if (_entrySequence.lastEntry is! OperatorEntryModel) {
-      return;
-    }
-    final firstNumber = _entrySequence.secondLast();
-    if (firstNumber == null || firstNumber is! NumberEntryModel) {
-      return;
-    }
-
-    final op = _entrySequence.lastEntry as OperatorEntryModel;
-    final inputMeasurement = _activeInput.toMeasurement();
-
-    final result = firstNumber.measurement.applyOp(op.operator, inputMeasurement);
-
-    _entrySequence = _entrySequence
-        .addNumberEntry(NumberEntryModel(inputMeasurement))
-        .addOperatorEntry(EqualsOperatorEntryModel(result));
-    _activeInput = MeasurementInput.empty();
+    final postfix = PostfixExpression.fromInfix(_entrySequence.toExpressionEntryList());
+    final tree = ExpressionTree.fromPostfix(postfix.items);
+    _entrySequence = _entrySequence.addOperatorEntry(EqualsOperatorEntryModel(tree.evaluate()));
   }
 
   @action
