@@ -62,7 +62,7 @@ class DivisionOperatorButton extends TextInputButton {
         builder: (_) => makeButton(
               context: context,
               isEnabled: () => store.canApplyOperator,
-              onPressed: () {},
+              onPressed: () => store.addOperator(Operator.divide),
             ));
   }
 }

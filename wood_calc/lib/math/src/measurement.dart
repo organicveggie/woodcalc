@@ -41,11 +41,17 @@ class Measurement implements Comparable<Measurement>, OperandExpression {
     return newFractionMeasure.add(Measurement.fromInches(newTotal));
   }
 
+  Measurement div(Measurement other) {
+    // TODO: fix me
+    return Measurement.fromInches(totalInches ~/ other.totalInches);
+  }
+
   Measurement applyOp(Operator op, Measurement other) {
     return switch (op) {
       Operator.add => add(other),
       Operator.subtract => sub(other),
       Operator.multiply => mul(other),
+      Operator.divide => div(other),
       _ => other,
     };
   }

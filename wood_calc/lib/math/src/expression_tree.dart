@@ -27,13 +27,7 @@ class OperatorExpressionNode implements ExpressionNode {
   Measurement evaluate() {
     final leftMeasure = left.evaluate();
     final rightMeasure = right.evaluate();
-
-    return switch (operator) {
-      Operator.add => leftMeasure.add(rightMeasure),
-      Operator.subtract => leftMeasure.sub(rightMeasure),
-      Operator.multiply => leftMeasure.mul(rightMeasure),
-      _ => leftMeasure.add(rightMeasure),
-    };
+    return leftMeasure.applyOp(operator, rightMeasure);
   }
 }
 

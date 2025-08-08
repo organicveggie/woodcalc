@@ -11,7 +11,7 @@ enum Operator implements OperatorExpression {
   add("+", Tier.one),
   subtract("-", Tier.one),
   multiply("*", Tier.two),
-  divide("/", Tier.two),
+  divide("÷", Tier.two),
   equals("=", Tier.notApplicable),
   leftParen("(", Tier.notApplicable),
   rightParen(")", Tier.notApplicable);
