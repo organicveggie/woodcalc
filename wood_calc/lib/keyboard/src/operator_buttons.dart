@@ -41,6 +41,15 @@ class ClearOperatorButton extends TextInputButton {
   const ClearOperatorButton({super.key}) : super(text: "C");
 
   @override
+  Color getBgColor(ColorScheme cs) => cs.secondary;
+  @override
+  Color getFgColor(ColorScheme cs) => cs.onSecondary;
+  @override
+  Color getDisabledBgColor(ColorScheme cs) => cs.secondaryContainer;
+  @override
+  Color getDisabledFgColor(ColorScheme cs) => cs.onSecondaryContainer;
+
+  @override
   Widget build(BuildContext context) {
     final store = GetIt.I<MainStore>();
     return Observer(
@@ -54,6 +63,15 @@ class ClearOperatorButton extends TextInputButton {
 
 class DivisionOperatorButton extends TextInputButton {
   const DivisionOperatorButton({super.key}) : super(text: "÷");
+
+  @override
+  Color getBgColor(ColorScheme cs) => cs.secondary;
+  @override
+  Color getFgColor(ColorScheme cs) => cs.onSecondary;
+  @override
+  Color getDisabledBgColor(ColorScheme cs) => cs.secondaryContainer;
+  @override
+  Color getDisabledFgColor(ColorScheme cs) => cs.onSecondaryContainer;
 
   @override
   Widget build(BuildContext context) {

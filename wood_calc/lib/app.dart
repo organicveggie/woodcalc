@@ -11,7 +11,7 @@ class WoodCalcApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wood Calc',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
       home: const HomeScreen(title: 'Wood Calc'),
