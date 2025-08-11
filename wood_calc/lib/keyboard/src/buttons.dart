@@ -43,11 +43,14 @@ abstract class BaseIconInputButton extends _ColorProvider {
         minHeight: 100,
       ),
       child: Center(
-        child: IconButton(
-          style: getDefaultButtonStyle(theme),
-          onPressed: (isEnabled() && (onPressed != null)) ? () => onPressed() : null,
-          icon: icon,
-        ),
+        child: SizedBox(
+            height: 40,
+            width: 56,
+            child: IconButton(
+              style: getDefaultButtonStyle(theme),
+              onPressed: (isEnabled() && (onPressed != null)) ? () => onPressed() : null,
+              icon: icon,
+            )),
       ),
     );
   }
