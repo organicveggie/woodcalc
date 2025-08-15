@@ -10,7 +10,13 @@ class MeasurementInput {
   final Fraction? _fraction;
 
   const MeasurementInput(this._digits, this._fraction);
+
   MeasurementInput.empty() : this(BuiltList<int>([]), null);
+
+  factory MeasurementInput.fromFraction(Fraction f) {
+    return MeasurementInput(BuiltList<int>.of([]), f);
+  }
+
   factory MeasurementInput.fromMeasurement(Measurement m) {
     final newDigits = <int>[];
     final inchStr = m.totalInches.toString();

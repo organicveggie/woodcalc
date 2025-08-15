@@ -22,7 +22,7 @@ class KeyboardGrid extends StatelessWidget {
           children: [
             ClearOperatorButton(),
             Container(),
-            Container(),
+            FractionButton(),
             DivisionOperatorButton(),
           ],
         ),

@@ -25,6 +25,9 @@ abstract class _MainStore with Store {
   }
 
   @computed
+  bool get canUseDenominator => ((_activeInput.isNotEmpty && _activeInput.fraction == null) || _activeInput.isEmpty);
+
+  @computed
   bool get canEquals {
     if (_entrySequence.length < 2) return false;
     if (_entrySequence.length == 2 && _activeInput.isEmpty) return false;
@@ -56,6 +59,21 @@ abstract class _MainStore with Store {
   @action
   void addInputDigit(int digit) {
     _activeInput = _activeInput.addDigit(digit);
+  }
+
+  @action
+  void addInputDenominator(Denominator d) {
+    if (_activeInput.isEmpty) {
+      if (_entrySequence.isEmpty) {
+        _activeInput = MeasurementInput.fromFraction(Fraction(1, d));
+      } else {
+        // TODO: Handle non-empty sequence
+      }
+    } else {
+      final m = _activeInput.toMeasurement();
+      final newMeasurement = Measurement.fromFraction(Fraction(m.totalInches, d));
+      _activeInput = MeasurementInput.fromMeasurement(newMeasurement);
+    }
   }
 
   @action

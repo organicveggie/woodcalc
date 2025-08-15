@@ -1,3 +1,4 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get_it/get_it.dart';
@@ -6,6 +7,8 @@ import 'package:wood_calc/math/math.dart';
 import 'package:wood_calc/stores/main.dart';
 
 import 'buttons.dart';
+
+typedef FractionMenuEntry = DropdownMenuEntry<Denominator>;
 
 class AddOperatorButton extends IconInputButton {
   const AddOperatorButton({super.key}) : super(icon: const Icon(Symbols.add));
@@ -97,6 +100,38 @@ class EqualOperatorButton extends IconInputButton {
               isEnabled: () => store.canEquals,
               onPressed: () => store.calculateEquals(),
             ));
+  }
+}
+
+class FractionButton extends IconInputButton {
+  const FractionButton({super.key}) : super(icon: const Icon(Symbols.star));
+
+  @override
+  Widget build(BuildContext context) {
+    final store = GetIt.I<MainStore>();
+    return Observer(builder: (_) {
+      final canUseDenominator = store.canUseDenominator;
+      final menuChildren = BuiltList.of(Denominator.values.map((d) => MenuItemButton(
+            child: Text('1/${d.value}'),
+            onPressed: () {
+              store.addInputDenominator(d);
+            },
+          )));
+      return MenuAnchor(
+          menuChildren: menuChildren.toList(),
+          builder: (_, MenuController controller, Widget? child) {
+            return makeIconButton(
+                context: context,
+                isEnabled: () => canUseDenominator,
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                });
+          });
+    });
   }
 }
 
