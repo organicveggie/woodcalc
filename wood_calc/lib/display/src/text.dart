@@ -48,7 +48,12 @@ class MeasurementText extends StatelessWidget {
   }
 
   String measurementAsText(DisplayMode mode, Measurement measurement) {
+    if ((measurement.totalInches == 0) && (measurement.fraction == null)) return "0\"";
+
     final fraction = (measurement.fraction == null) ? "" : " ${measurement.fraction!.asString()}";
+    if (measurement.totalInches == 0) {
+      return "$fraction\"";
+    }
     return switch (mode) {
       DisplayMode.feetAndInches => "${measurement.feet}' ${measurement.inches}$fraction\"",
       _ => "${measurement.totalInches}$fraction\"",

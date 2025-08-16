@@ -47,7 +47,7 @@ class _TextDisplay extends StatelessWidget {
 
         if (entries.isEmpty) {
           // No previous entries and no input in progress, so display a placeholder.
-          entries.add(Text("0", style: Theme.of(context).textTheme.headlineLarge));
+          entries.add(Text("0\"", style: Theme.of(context).textTheme.headlineLarge));
         }
 
         return Row(children: entries);
