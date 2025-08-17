@@ -64,15 +64,15 @@ abstract class _MainStore with Store {
   @action
   void addInputDenominator(Denominator d) {
     if (_activeInput.isEmpty) {
-      if (_entrySequence.isEmpty) {
-        _activeInput = MeasurementInput.fromFraction(Fraction(1, d));
-      } else {
-        // TODO: Handle non-empty sequence
-      }
+      _activeInput = MeasurementInput.fromFraction(Fraction(1, d));
     } else {
       final m = _activeInput.toMeasurement();
-      final newMeasurement = Measurement.fromFraction(Fraction(m.totalInches, d));
-      _activeInput = MeasurementInput.fromMeasurement(newMeasurement);
+      if (m.fraction != null) {
+        // TODO: Display error on double fractions.
+      } else {
+        final newMeasurement = Measurement.fromFraction(Fraction(m.totalInches, d));
+        _activeInput = MeasurementInput.fromMeasurement(newMeasurement);
+      }
     }
   }
 
@@ -103,7 +103,11 @@ abstract class _MainStore with Store {
   @action
   void backspace() {
     if (_activeInput.isNotEmpty) {
-      _activeInput = _activeInput.removeLastDigit();
+      if (_activeInput.fraction != null) {
+        _activeInput = MeasurementInput(_activeInput.digits, null);
+      } else {
+        _activeInput = _activeInput.removeLastDigit();
+      }
       return;
     }
     if (_entrySequence.isEmpty) return;
